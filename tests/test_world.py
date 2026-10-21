@@ -46,7 +46,7 @@ def test_bindings():
 def test_splits_and_families():
     c = families.counts()
     # each task directory holds its trials (two per task in train): 790 games of the first family
-    assert c["train"]["pick_and_place_simple"] == 790 and c["valid_unseen"]["pick_and_place_simple"] == 20
+    assert c["train"]["pick_and_place_simple"] == 790 and c["valid_unseen"]["pick_and_place_simple"] == 24
     assert len(families.sample("valid_seen", "pick_and_place_simple", 3, seed=7)) == 3
 
 

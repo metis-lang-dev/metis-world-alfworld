@@ -73,6 +73,8 @@ pred holdingrecobj : alf.
 pred unchosen : alf.                      % no object chosen yet
 pred want(object) : alf.                  % the object the policy works on, while fetching it
 pred carrying : alf.                      % the policy holds its object: on the way to a destination
+pred arrived(receptacle) : alf.           % the destination the policy has reached: no more going (greedy, not wandering)
+pred seeking : alf.                       % not arrived yet (the complement)
 pred placed : alf.                        % the task's object is in its receptacle: done
 
 stage act {
@@ -90,21 +92,23 @@ stage act {
 
   % ── taking it ──
   %% I take {O} from {R}.
-  take_open [dyn] : want(O) * $at(L) * $recat(R, L) * inrecep(O, R) * objat(O, L) * handsfree * $openable(R) * $opened(R) -o carrying * holds(O) * holding.
+  take_open [dyn] : want(O) * $at(L) * $recat(R, L) * inrecep(O, R) * objat(O, L) * handsfree * $openable(R) * $opened(R) -o carrying * seeking * holds(O) * holding.
   %% I take {O} from {R}.
-  take_plain [dyn] : want(O) * $at(L) * $recat(R, L) * inrecep(O, R) * objat(O, L) * handsfree * $notopenable(R) -o carrying * holds(O) * holding.
+  take_plain [dyn] : want(O) * $at(L) * $recat(R, L) * inrecep(O, R) * objat(O, L) * handsfree * $notopenable(R) -o carrying * seeking * holds(O) * holding.
 
   % ── going to the target receptacle ──
   %% I carry {O} to {R}.
-  go_target [dyn] : carrying * at(L) * $dest(R) * $recat(R, L2) * L <> L2 -o carrying * at(L2).
+  go_target [dyn] : carrying * seeking * at(L) * $dest(R) * $recat(R, L2) * L <> L2 -o carrying * arrived(R) * at(L2).
+  %% {R} is right here.
+  here_target [dyn] : carrying * seeking * $at(L) * $dest(R) * $recat(R, L) -o carrying * arrived(R).
 
   % ── opening the target ──
   %% I open {R} to put {O} in.
-  open_target [dyn] : carrying * $at(L) * $dest(R) * $recat(R, L) * $openable(R) * closed(R) -o carrying * opened(R) * checked(R).
+  open_target [dyn] : carrying * $arrived(R) * $at(L) * $recat(R, L) * $openable(R) * closed(R) -o carrying * opened(R) * checked(R).
 
   % ── putting it ──
   %% I put {O} in {R}.
-  put_open [dyn] : carrying * holds(O) * holding * $at(L) * $dest(R) * $recat(R, L) * $openable(R) * $opened(R) -o inrecep(O, R) * objat(O, L) * handsfree * placed.
+  put_open [dyn] : carrying * arrived(R) * holds(O) * holding * $at(L) * $recat(R, L) * $openable(R) * $opened(R) -o inrecep(O, R) * objat(O, L) * handsfree * placed.
   %% I put {O} on {R}.
-  put_plain [dyn] : carrying * holds(O) * holding * $at(L) * $dest(R) * $recat(R, L) * $notopenable(R) -o inrecep(O, R) * objat(O, L) * handsfree * placed.
+  put_plain [dyn] : carrying * arrived(R) * holds(O) * holding * $at(L) * $recat(R, L) * $notopenable(R) -o inrecep(O, R) * objat(O, L) * handsfree * placed.
 }

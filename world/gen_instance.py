@@ -90,7 +90,8 @@ def generate(game_dir, out_dir, domain_rel="../alfred_domain.llp"):
         "# instance over ../alfred_domain.llp; the host is the world's (alf_host.py, a shim).\n"
         "program: %s.llp\nhost: alf_host.py:make\nclock: {beats: 1}\nrecords: records/\n"
         "display: ALFWorld %s\nline: \"%s\"\nvoice: own\n" % (iid, iid, task, (info.get("desc") or task).replace('"', "'").strip()))
-    shutil.copy(os.path.join(HERE, "package_host.py"), os.path.join(pkg, "alf_host.py"))
+    shim = open(os.path.join(HERE, "package_host.py")).read().replace("__WORLD__", HERE)
+    open(os.path.join(pkg, "alf_host.py"), "w").write(shim)
     return path, len(dyn), len(info["static"])
 
 
