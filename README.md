@@ -17,11 +17,33 @@ become `+atom` / `-atom` lines, the program's actions become the environment's c
 
 | path | what |
 |---|---|
-| `setup.sh` | the world's venv (`.venv/`, Python 3.12): `alfworld[full]` pinned, its game data under `data/` (`ALFWORLD_DATA`) |
-| `world/alf_host.py` | the host: `make(case)` → tick / on_event / observe / snapshot / restore over one ALFWorld game; the facts ↔ atoms mapping |
-| `world/families.py` | the configuration families (task types × scenes) and the splits (discovery / held-out) |
-| `domains/<task>/` | the packages the loop learns: a baseline program per task type, its manifest naming this host |
-| `experiments/` | the runs: baseline, the closed loop, the held-out measure; their records |
+| `setup.sh` | the world's venv (`.venv/`, Python 3.12): `alfworld[full]` 0.4.2 pinned, its game data (2.3 GB) under `data/` (`ALFWORLD_DATA`) |
+| `world/ground.py` | the PDDL facts as atoms: a per-game handle table (`spoon1`, `countertop2`, `loc3`, `cabinet_t`), the predicate map, STATIC vs DYNAMIC |
+| `world/alf_gym.py` | one game as a child process (JSON lines): open / reset / step(command) → the dynamic facts, the admissible commands, won |
+| `world/alf_host.py` | the host: `make(case)` → tick (the sync of the program's facts to the game's) / on_event (a fired rule → the game's command) / observe / snapshot / restore (a replay); `$METIS_ALF_LOG` records every command, whether the game took it, what changed |
+| `world/gen_instance.py` | a game as a PACKAGE: `domains/<iid>/{<iid>.llp, domain.yaml, game.json, alf_host.py}` — the instance's types, static facts as Horn facts, the task resolved to the game's things (`target/1`, `dest/1`), the start |
+| `domains/alfred_domain.llp` | the LIFTED base: ALFRED's actions as the agent's beliefs, and the greedy rule policy for pick-and-place |
+| `world/families.py` | the seven task families and ALFWorld's splits (train = discovery; valid_seen / valid_unseen = held-out) |
+| `experiments/baseline.py` | the program's own rules on a sample of games, no loop: won / lost, the commands, the refusals |
+| `tests/` | the grounding is deterministic, the host runs a plan to a win on the real game, a refusal leaves the facts, the package compiles and reaches `placed` alone |
+
+## Findings while building (step 1)
+
+- **Handles must be shared, not recomputed.** TextWorld hands the facts back as a set; a
+  per-process first-appearance numbering differed between the generator and the host, so
+  the program's `loc2` was the fridge in one and the coffee machine in the other. The
+  generator orders the facts and writes the map into `game.json`; the host reuses it.
+- **The game's verbs are TextWorld's, not ALFWorld's agent aliases.** `put O in/on R` is
+  the agent layer's; the game lists `move O to R`. The host sends the game's verbs and
+  records what the game offered when it refuses, so a refusal in the records is the
+  world's, never a phrasing slip.
+- **The refusal path works as designed.** A rule that fires without its real precondition
+  (taking from a closed fridge) sends a command the game answers with "Nothing happens.":
+  no fact changes while the rule produced its effect — the surprise the loop learns from.
+- **Grounding size.** A rule carrying the task's type variables grounded to millions of
+  instances and overflowed the compiler's run; the generator resolves the task to the
+  game's things (`target(O)`, `dest(R)`) so no rule carries a type, and the instance runs
+  in both toolchains in seconds.
 
 ## Not here
 The closure (surprise → proposal → gate → reload), the gate policy and the metrics: the
