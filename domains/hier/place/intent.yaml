@@ -50,7 +50,7 @@ spoken:
     - ["put the book on the desk", {"intent":"PUT","object":"BOOK1","receptacle":"DESK1"}, "Putting the book on the desk."]
 
 map:
-  - {verb: PUT, atom: "put({object:object}, {receptacle:receptacle})", act: put}
+  - {verb: PUT, atom: "put({object:object},{receptacle:receptacle})", act: put}
 values:
   object: {}
   receptacle: {}

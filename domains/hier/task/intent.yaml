@@ -52,7 +52,7 @@ spoken:
     - ["take the book to the desk", {"intent":"FETCH","object":"BOOK1","receptacle":"DESK1"}, "Taking the book to the desk."]
 
 map:
-  - {verb: FETCH, atom: "fetch({object:object}, {receptacle:receptacle})", act: fetch}
+  - {verb: FETCH, atom: "fetch({object:object},{receptacle:receptacle})", act: fetch}
 values:
   object: {}
   receptacle: {}
