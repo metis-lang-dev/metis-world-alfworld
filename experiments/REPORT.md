@@ -116,6 +116,26 @@ instance declares, which gen_hier does; (4) the replay of the commands so far
 60 s per game at worst, fine for the text game, not for a simulator with a slow reset
 (MiniHack's host should keep the process and switch packages in it).
 
+## The director makes the switch (alf-hierarchy step 3, 2026-10-22; docs/HIERARCHY.md §Step 3)
+
+The same 20 games with `experiments/hier.py --director`: the table is gone, the director's
+rules (`domains/director_domain.llp`, its instance generated from the specialists' declared
+ports) wake, route and sleep the specialists from the kinds that arrive:
+
+| games | won | refusals | activations / game | director beats / game | seconds / game |
+|---|---|---|---|---|---|
+| train | 10/10 | 0 | 6.0 | 20.0 | 68 |
+| valid_unseen | 10/10 | 0 | 6.0 | 20.0 | 69 |
+
+The same six activations and the same commands as the manual switch; 20 beats per game
+(the seed, then goal / result / idle per activation, the end); the time is the kernel runs
+(one per beat, a fresh process each — the agent keeps the director in memory and pays none
+of it). The detour a person makes and the task never does — `open(R)` from elsewhere →
+`elsewhere(R)` → nav → `reached(R)` → the goal back → `accessible(R)` — is a test, not a
+run: no game in the family produces it. Activation needs no model: the rules did every
+switch; the small model's part is typing the person's words into the attended card, two
+cards served instead of five.
+
 ## Next
 world-alfworld step 2 is REPLACED by loop-policy (s-dd842f2a, metis-agentic-loop
 docs/POLICY.md): the loop builds this family from an EMPTY domain in phases (exploration /
