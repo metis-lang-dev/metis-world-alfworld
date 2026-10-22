@@ -38,13 +38,16 @@ def interpreter():
     p = os.environ.get("METIS_ALF_PY")
     if p:
         return p
-    d = HERE
-    for _ in range(4):
+    repo = os.path.dirname(HERE)
+    own = os.path.join(repo, ".venv", "bin", "python")  # the world repo's own venv (setup.sh)
+    if os.path.exists(own):
+        return own
+    d = repo
+    for _ in range(3):  # a shared venv beside the world repos (.worlds/alf); never a sibling .venv
         d = os.path.dirname(d)
-        for v in (".venv", ".worlds/alf"):
-            c = os.path.join(d, v, "bin", "python")
-            if os.path.exists(c):
-                return c
+        c = os.path.join(d, ".worlds", "alf", "bin", "python")
+        if os.path.exists(c):
+            return c
     return sys.executable
 
 
