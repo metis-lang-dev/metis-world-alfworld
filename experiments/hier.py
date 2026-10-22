@@ -52,7 +52,7 @@ def run_game(game_dir, workdir, max_activations=16):
     mirror = AlfHost(flat_pkg)                       # the driver's own copy of the game
     info = dict(info, static=sorted(mirror.static), task_type=mirror.task, params=mirror.params)
     t0 = time.time()
-    commands, tokens, results, acts, error, outcome = [], ["unchosen", "start"], [], [], None, "running"
+    commands, tokens, results, acts, error, outcome = [], gen_hier.seed(info), [], [], None, "running"
     try:
         for k in range(max_activations):
             # the task domain: until it asks for something, or is done, or stuck
@@ -67,7 +67,7 @@ def run_game(game_dir, workdir, max_activations=16):
                 break
             goal = out[0]
             base = goal.split("(")[0]
-            if base in ("done", "stuck"):
+            if base in ("done", "stuck", "wrong_dest"):
                 outcome = base if base == "done" else "stuck: " + goal
                 break
             spec = gen_hier.HANDLES[base]            # the manual switch

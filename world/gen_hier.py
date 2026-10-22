@@ -23,8 +23,8 @@ SPECS = {
                    dyn=("at", "objat", "inrecep", "opened", "closed", "holds", "holding", "handsfree"), out=("taken", "refused")),
     "place":  dict(types=("location", "receptacle", "object"), static=("recat", "openable", "notopenable"),
                    dyn=("at", "objat", "inrecep", "opened", "closed", "holds", "holding", "handsfree"), out=("placed", "refused")),
-    "task":   dict(types=("object", "receptacle", "thing"), static=("target", "dest"), dyn=("inrecep",),
-                   out=("goto", "open", "take", "put", "done", "stuck")),
+    "task":   dict(types=("object", "receptacle", "thing"), static=("target", "dest", "notdest"), dyn=("inrecep",),
+                   out=("goto", "open", "take", "put", "done", "stuck", "wrong_dest")),
 }
 # which specialist handles a sub-goal: the driver's manual switch table (step 3 makes it the director's handles/2)
 HANDLES = {"goto": "nav", "open": "access", "take": "grasp", "put": "place"}
@@ -46,7 +46,19 @@ def static_facts(spec, info):
         facts += ["notopenable(%s)" % r for r, k in sorted(kinds.items()) if k == "receptacle" and r not in openable]
     if "target" in want:
         facts += [f.rstrip(".") for f in gen_instance.TASK_FACTS[info["task_type"]](info["params"], info)]
+        dests = {f[len("dest("):-1] for f in facts if f.startswith("dest(")}
+        kinds = info["handles"]["kind"]
+        facts += ["notdest(%s)" % r for r, k in sorted(kinds.items()) if k == "receptacle" and r not in dests]
     return facts
+
+
+def seed(info):
+    """The driver's way into the task: fetch(the first target, the first destination) — the same
+    atom the FETCH intent types."""
+    facts = static_facts("task", info)
+    o = sorted(a[len("target("):-1] for a in facts if a.startswith("target("))[0]
+    r = sorted(a[len("dest("):-1] for a in facts if a.startswith("dest("))[0]
+    return ["fetch(%s,%s)" % (o, r)]
 
 
 def generate(game_dir, out_dir, spec, k, info, reading, init, replay, domain_rel=None):

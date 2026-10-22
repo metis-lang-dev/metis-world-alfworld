@@ -159,7 +159,7 @@ def test_hierarchy_instances_see_less(tmp_path):
         h.gym.close()
     flat_init = sum(1 for l in open(path) if l.startswith("#init"))
     for spec in gen_hier.SPECS:
-        p = gen_hier.generate(game_dir(), str(tmp_path / "pk"), spec, 0, info, reading, ["unchosen"], [])
+        p = gen_hier.generate(game_dir(), str(tmp_path / "pk"), spec, 0, info, reading, gen_hier.seed(info), [])
         init = sum(1 for l in open(p) if l.startswith("#init"))
         assert init < flat_init, (spec, init, flat_init)
-        assert gen_hier.vector(spec)["rules"] <= 10
+        assert gen_hier.vector(spec)["rules"] <= 12

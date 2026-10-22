@@ -49,7 +49,7 @@ def measure(game, wd):
     dests = sorted(a[len("dest("):-1] for a in gen_hier.static_facts("task", info) if a.startswith("dest("))
     o, d = targets[0], dests[0]
     rec = next(a for a in reading if a.startswith("inrecep(%s," % o))[8:-1].split(",")[1]
-    goals = {"task": ["unchosen", "start"], "nav": ["goto(%s)" % rec], "access": ["open(%s)" % rec], "grasp": ["take(%s)" % o],
+    goals = {"task": gen_hier.seed(info), "nav": ["goto(%s)" % rec], "access": ["open(%s)" % rec], "grasp": ["take(%s)" % o],
              "place": ["put(%s,%s)" % (o, d)]}
     for spec in gen_hier.SPECS:
         p = gen_hier.generate(game, os.path.join(wd, "pk"), spec, 0, info, reading, goals[spec], [])

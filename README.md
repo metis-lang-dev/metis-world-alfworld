@@ -25,7 +25,10 @@ become `+atom` / `-atom` lines, the program's actions become the environment's c
 | `domains/alfred_domain.llp` | the LIFTED base: ALFRED's actions as the agent's beliefs, and the greedy rule policy for pick-and-place |
 | `world/families.py` | the seven task families and ALFWorld's splits (train = discovery; valid_seen / valid_unseen = held-out) |
 | `experiments/baseline.py` | the program's own rules on a sample of games, no loop: won / lost, the commands, the refusals |
-| `tests/` | the grounding is deterministic, the host runs a plan to a win on the real game, a refusal leaves the facts, the package compiles and reaches `placed` alone |
+| `domains/hier/` | the HIERARCHY (alf-hierarchy, `docs/HIERARCHY.md`): five lifted specialists — `nav` (goto→reached), `access` (open→accessible / refused), `grasp` (take→taken / refused), `place` (put→placed / refused), `task` (the planner: sub-goals out, results in, `done` / `stuck`) |
+| `world/gen_hier.py` | one activation of a specialist as a generated instance: its predicates, its facts, the things its goal names (`game.json`: `replay`, `observe`, `out`, `things` for the host) |
+| `experiments/hier.py` | the hierarchy with a MANUAL switch: one kernel run per activation, the driver's table `{goto: nav, open: access, take: grasp, put: place}` is the switch; `hier_vector.py` the complexity vector per domain |
+| `tests/` | the grounding is deterministic, the host runs a plan to a win on the real game, a refusal leaves the facts, the package compiles and reaches `placed` alone; the hierarchy wins by the manual switch, its instances see less |
 
 ## Findings while building (step 1)
 

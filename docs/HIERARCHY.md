@@ -26,7 +26,7 @@ specialist's vector is a fraction of the flat one while the task still wins.
 | `access` | `open(R)` | `accessible(R)` / `refused(R)` | `at`, `opened`, `closed`; `recat`, `openable`, `notopenable` | open_closed, already_open, no_door, not_here |
 | `grasp` | `take(O)` | `taken(O)` / `refused(O)` | `at`, `objat`, `inrecep`, `opened`, `closed`, `holds`, `holding`, `handsfree`; `recat`, `openable`, `notopenable` | take_open, take_plain, not_here, shut, hands_full |
 | `place` | `put(O, R)` | `placed(O, R)` / `refused(R)` | `at`, `opened`, `closed`, `holds`, `holding`, `handsfree`; `recat`, `openable`, `notopenable` | put_open, put_plain, not_here, shut, empty_handed |
-| `task` | the task's facts `target(O)`, `dest(R)` + the results above | `goto`, `open`, `take`, `put` (the sub-goals), `done`, `stuck(X)` | `inrecep(O, R)` | choose, go_for, open_for, take_for, go_dest, open_dest, put_dest, finish, stuck |
+| `task` | `fetch(O, R)` — the one way in: the FETCH intent a person types, or the driver's seed (first target, first destination); the task's facts `target(O)`, `dest(R)`, `notdest(R)`; the results above | `goto`, `open`, `take`, `put` (the sub-goals), `done`, `stuck(X)`, `wrong_dest(R)` | `inrecep(O, R)` | fetch, not_dest, go_for, open_for, take_for, go_dest, open_dest, put_dest, finish, stuck_fetch, stuck_carry |
 
 Conventions, the same as console-nav's ui base:
 - a goal atom is consumed by exactly one rule per state (the explorer's check), and every
