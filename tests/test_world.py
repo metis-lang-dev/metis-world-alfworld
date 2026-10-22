@@ -199,3 +199,55 @@ def test_activation_cards(tmp_path):
         assert [r["atom"].split("(")[0] for r in c["map"]] == [{"nav": "goto", "access": "open", "grasp": "take",
                                                                  "place": "put", "task": "fetch"}[spec]]
         assert all(" " not in r["atom"] for r in c["map"])     # a do-line reads a space as its count's
+
+
+# ── the director (alf-hierarchy step 3): rules make the switch; a detour for a person's goal from elsewhere ──
+def _hier_workdir(tmp_path):
+    import shutil
+    wd = str(tmp_path)
+    shutil.copy(os.path.join(ROOT, "domains", "alfred_domain.llp"), os.path.join(wd, "alfred_domain.llp"))
+    shutil.copy(os.path.join(ROOT, "domains", "director_domain.llp"), os.path.join(wd, "director_domain.llp"))
+    os.makedirs(os.path.join(wd, "hier"))
+    for s in gen_hier.SPECS:
+        shutil.copy(os.path.join(ROOT, "domains", "hier", s + "_domain.llp"), os.path.join(wd, "hier", s + "_domain.llp"))
+    return wd
+
+
+def test_director_makes_the_switch(tmp_path):
+    """The director's rules wake, route and sleep the specialists from the kinds that arrive: the same
+    game, the same six activations as the manual switch, won; every specialist slept after its result."""
+    if not os.path.exists(os.path.join(os.path.dirname(ROOT), ".venv", "bin", "metis")):
+        pytest.skip("no metispy `metis` beside the world repos")
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import hier
+    r = hier.run_game_director(game_dir(), _hier_workdir(tmp_path))
+    assert r["error"] is None and r["won"] and r["outcome"] == "done", r
+    assert [a["spec"] for a in r["activations"] if a["spec"] != "task"] == ["nav", "access", "grasp", "nav", "access", "place"]
+    effects = [e for b in r["beats"] for e in b["effects"]]
+    assert effects.count("wake(nav)") == 2 and effects.count("sleep(nav)") == 2 and "ended(done)" in effects
+    assert r["refused"] == 0
+
+
+def test_director_detours_a_goal_from_elsewhere(tmp_path):
+    """A person's open(R) while the agent stands elsewhere: access answers elsewhere(R), the director
+    puts the goal aside, sends nav, and on reached(R) gives access its goal back; R ends up open."""
+    if not os.path.exists(os.path.join(os.path.dirname(ROOT), ".venv", "bin", "metis")):
+        pytest.skip("no metispy `metis` beside the world repos")
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import hier
+    wd = _hier_workdir(tmp_path)
+    path, _, _ = gen_instance.generate(game_dir(), wd)
+    h = AlfHost(os.path.dirname(path))
+    try:
+        at = next(a for a in h.reading() if a.startswith("at("))[3:-1]
+        far = sorted(x for x in h.openable if "recat(%s,%s)" % (x, at) not in h.static)[0]
+    finally:
+        h.gym.close()
+    r = hier.run_game_director(game_dir(), wd, first=["open(%s)" % far])
+    assert r["error"] is None, r
+    assert [(a["spec"], a["result"]) for a in r["activations"]][:3] == [
+        ("access", ["elsewhere(%s)" % far]), ("nav", ["reached(%s)" % far]), ("access", ["accessible(%s)" % far])]
+    detour = next(b for b in r["beats"] if b["arrival"] == "elsewhere(%s)" % far)
+    assert set(detour["effects"]) == {"forward(nav,goto)", "sleep(access)", "wake(nav)"}
+    effects = [e for b in r["beats"] for e in b["effects"]]
+    assert effects.count("forward(access,open)") == 2

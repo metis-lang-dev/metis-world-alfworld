@@ -23,6 +23,7 @@ pred handsfree : place.
 pred put(object, receptacle) : place.     % the goal (in)
 pred placed(object, receptacle) : place.  % the result (out)
 pred refused(receptacle) : place.         % the refusal (out)
+pred elsewhere(receptacle) : place.      % the refusal the director detours: I am not there
 
 stage act {
   %% I put {O} in {R}.
@@ -30,7 +31,7 @@ stage act {
   %% I put {O} on {R}.
   put_plain [dyn] : put(O, R) * holds(O) * holding * $at(L) * $recat(R, L) * $notopenable(R) -o inrecep(O, R) * objat(O, L) * handsfree * placed(O, R).
   %% I am not at {R}.
-  not_here [dyn] : put(O, R) * $at(L) * $recat(R, L2) * L <> L2 -o refused(R).
+  not_here [dyn] : put(O, R) * $at(L) * $recat(R, L2) * L <> L2 -o elsewhere(R).
   %% {R} is shut.
   shut [dyn] : put(O, R) * $at(L) * $recat(R, L) * $closed(R) -o refused(R).
   %% I am not holding {O}.

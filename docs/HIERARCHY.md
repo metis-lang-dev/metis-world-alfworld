@@ -79,21 +79,47 @@ runs the kernel as the flat one did, with the person's words typed into the ATTE
 specialist's card. Nothing of the flat domain changes; the hierarchy is a second tree under
 `domains/hier/`.
 
-## Step 3 — the orchestrator domain (the architect writes the base and the instance; opus
-the orchestrator; nina the generator)
+## Step 3 — the orchestrator domain: the director (the architect: the base and the instance,
+done; opus: the orchestrator; nina: the generator)
 
-The director (metis-agent `docs/DIRECTOR.md`) replaces the driver's table with rules:
-`handles(nav, goto)`, `handles(access, open)`, … are the instance's facts, GENERATED from
-the specialists' declared ports (decision 1); `+seen(goto(R))` from the task wakes `nav`
-and forwards the goal; a `refused(R)` from a specialist re-routes once (to `nav` when the
-reason is `not_here`), then escalates; `attention` follows the last routed goal (decision
-2); `linger` is a manifest key, 1 beat here (decision 3); the orchestrator serves the
-director's card and the attended specialist's only (decision 4). Automatic activation has
-two sources, and both are `seen/1`: the task's sub-goals (goal-driven) and the world's facts
-a specialist handles (`holding` makes `place` relevant, `closed(R)` at `R` makes `access`
-relevant) — the second source is what makes the director more than a dispatcher, and it is
-measured by the same driver: the task domain's sub-goals switched OFF, the world's facts
-alone waking specialists (a weaker policy, the gap recorded).
+Activation is RULES, not a model. `domains/director_domain.llp` is the lifted director of
+metis-agent `docs/DIRECTOR.md`: it sees KINDS — `seen(K)`, an atom of kind K arrived; the
+atom's arguments ride in the orchestrator's frame, not in the director — and a specialist's
+idleness, `idle(D)`; its effects are the agent's own verbs, `wake(D)`, `sleep(D)`,
+`forward(D, K)`, `ask(K)`, `ended(K)`. The ALFWorld instance (`gen_hier.generate_director`)
+is GENERATED from the specialists' declared ports (`SPECS`: a goal kind in, result kinds
+out — decision 1, the SDK generator's job later): `handles(nav, goto)`, `handles(access,
+open)`, …, `handles(task, fetch | reached | accessible | taken | placed | refused)`,
+`planner(task)`, `result/1`, `end/1`, `detour(elsewhere, goto)`, `escalate(elsewhere,
+refused)`. One beat = one arrival; the driver (`experiments/hier.py --director`) runs the
+director, reads its effects, and acts on them — the table of step 1 is gone.
+
+The rules: `wake_for` (a kind a sleeping specialist handles wakes it and gets the goal),
+`route` (a kind the planner handles goes to it; `attention` follows), `route_busy`,
+`sleep` (a specialist is idle after its result: linger 1 beat, decision 3), `detour` (a
+specialist answers `elsewhere(R)`: its goal is put aside as `pending`, the navigator is
+woken with `goto`, once), `resume` (the navigator's result wakes the specialist with its
+pending goal), `escalate` (a second `elsewhere` while a detour is open becomes `refused` for
+the planner), `ended`/`unknown` (an end kind or a kind nobody handles → `ask`: the
+disengagement hook of loop-policy). The specialists' "I am not there" refusals are the
+kind `elsewhere(R)` for that reason; shut / hands-full / empty-handed stay `refused`.
+
+Measured: the same 20 games through the director (records `hier-director-*`) — the same
+six activations per game, 20 director beats each (goal, result, idle per activation, the
+seed and the end), won; and the detour scenario a person makes and the task never does:
+`open(cabinet1)` typed while the agent stands elsewhere → access answers
+`elsewhere(cabinet1)` → the director sleeps access, wakes nav with `goto(cabinet1)` →
+`reached` → access gets `open(cabinet1)` back → `accessible(cabinet1)`, routed to the task
+(two tests in `tests/test_world.py`). Attention = the last routed domain (decision 2).
+
+What remains of step 3 on the agent side (opus, with nina's generator): the orchestrator
+runs this director's package beside the attended specialist's only (decision 4; opus's F3:
+a deactivated card leaves the turn), the specialists stay installed and are re-instanced per
+activation so a result is voiced as the result and not as the end of a run (F4, F5), and
+the frames are the orchestrator's (the atom behind a kind, kept through a detour). The
+world-driven source of activation (a world fact alone waking a specialist, HIERARCHY v1's
+second source) needs reactive specialists — the flat rules partitioned by activity, no
+planner — and is a later measurement, not this step's.
 
 ## What it gives the agent paper
 

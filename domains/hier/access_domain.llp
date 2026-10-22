@@ -20,6 +20,7 @@ pred checked(receptacle) : access.
 pred open(receptacle) : access.           % the goal (in)
 pred accessible(receptacle) : access.     % the result (out)
 pred refused(receptacle) : access.        % the refusal (out): not here
+pred elsewhere(receptacle) : access.      % the refusal the director detours: I am not there
 
 stage act {
   %% I open {R}.
@@ -29,5 +30,5 @@ stage act {
   %% {R} has nothing to open.
   no_door [dyn] : open(R) * $at(L) * $recat(R, L) * $notopenable(R) -o accessible(R).
   %% I am not at {R}.
-  not_here [dyn] : open(R) * $at(L) * $recat(R, L2) * L <> L2 -o refused(R).
+  not_here [dyn] : open(R) * $at(L) * $recat(R, L2) * L <> L2 -o elsewhere(R).
 }

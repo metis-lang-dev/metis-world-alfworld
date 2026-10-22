@@ -23,6 +23,7 @@ pred handsfree : grasp.
 pred take(object) : grasp.                % the goal (in)
 pred taken(object) : grasp.               % the result (out)
 pred refused(object) : grasp.             % the refusal (out)
+pred elsewhere(receptacle) : grasp.      % the refusal the director detours: I am not there
 
 stage act {
   %% I take {O} from {R}.
@@ -30,7 +31,7 @@ stage act {
   %% I take {O} from {R}.
   take_plain [dyn] : take(O) * $at(L) * $recat(R, L) * inrecep(O, R) * objat(O, L) * handsfree * $notopenable(R) -o holds(O) * holding * taken(O).
   %% I am not where {O} is.
-  not_here [dyn] : take(O) * $at(L) * $objat(O, L2) * L <> L2 -o refused(O).
+  not_here [dyn] : take(O) * $at(L) * $inrecep(O, R) * $recat(R, L2) * L <> L2 -o elsewhere(R).
   %% {R} is shut: I cannot reach {O}.
   shut [dyn] : take(O) * $at(L) * $recat(R, L) * $inrecep(O, R) * $closed(R) -o refused(O).
   %% My hands are full.
