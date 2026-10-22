@@ -14,7 +14,8 @@ namespace task produce (dyn).
 
 bwd target(object).                       % the task: an object the task wants moved
 bwd dest(receptacle).                     % … and a receptacle it wants it in
-bwd notdest(receptacle).                  % the complement, given by the instance
+bwd notdest(receptacle).                  % the complements, given by the instance
+bwd nottarget(object).
 
 pred inrecep(object, receptacle) : task.  % the world: where the target is
 % the sub-goals (out)
@@ -38,12 +39,15 @@ pred carry(object) : task.                % carrying it to the destination
 pred done : task.
 pred stuck(thing) : task.                 % a specialist refused and no rule handles it
 pred wrong_dest(receptacle) : task.       % the fetch names a receptacle this task does not want
+pred wrong_object(object) : task.         % … or an object it does not want (a silent substitution otherwise: opus's F1)
 
 stage act {
   %% I'll fetch {O} to {R}.
   fetch [dyn] : fetch(O, R) * $target(O) * $dest(R) -o want(O) * to(R) * start.
   %% {R} is not where this task wants {O}: I stop and ask.
   not_dest [dyn] : fetch(O, R) * $target(O) * $notdest(R) -o wrong_dest(R).
+  %% {O} is not what this task fetches: I stop and ask.
+  not_target [dyn] : fetch(O, R) * $nottarget(O) -o wrong_object(O).
   %% {O} is in {R}: I go there.
   go_for [dyn] : want(O) * start * $inrecep(O, R) -o want(O) * goto(R).
   %% At {R}: I need it open.

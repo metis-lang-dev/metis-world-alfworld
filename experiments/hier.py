@@ -67,7 +67,7 @@ def run_game(game_dir, workdir, max_activations=16):
                 break
             goal = out[0]
             base = goal.split("(")[0]
-            if base in ("done", "stuck", "wrong_dest"):
+            if base in ("done", "stuck", "wrong_dest", "wrong_object"):
                 outcome = base if base == "done" else "stuck: " + goal
                 break
             spec = gen_hier.HANDLES[base]            # the manual switch

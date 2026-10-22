@@ -181,7 +181,6 @@ def test_activation_cards(tmp_path):
         h.gym.close()
     kinds = info["handles"]["kind"]
     pick = {a[len("pickupable("):-1] for a in info["static"] if a.startswith("pickupable(")}
-    targets = {a[len("target("):-1] for a in gen_hier.static_facts("task", info) if a.startswith("target(")}
     plain = os.path.dirname(gen_hier.generate(game_dir(), str(tmp_path / "plain"), "nav", 0, info, reading, [], []))
     assert sorted(os.listdir(plain)) == ["alf_host.py", "domain.yaml", "game.json", "nav.llp"]
     for spec in gen_hier.SPECS:
@@ -190,7 +189,7 @@ def test_activation_cards(tmp_path):
         assert "intent: {spec: intent.yaml}" in open(os.path.join(pkg, "domain.yaml")).read()
         c = yaml.safe_load(open(os.path.join(pkg, "intent.yaml")))
         want = {"receptacle": {r for r, k in kinds.items() if k == "receptacle"},
-                "object": targets if spec == "task" else {o for o, k in kinds.items() if k == "object" and o in pick}}
+                "object": {o for o, k in kinds.items() if k == "object" and o in pick}}   # the task too: any pickupable may be named (F1)
         for slot, s in c["slots"].items():
             assert {v.lower() for v in s["enum"]} == want[slot], (spec, slot)
             assert c["values"][slot] == {v.upper(): v for v in want[slot]}

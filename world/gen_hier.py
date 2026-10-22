@@ -26,8 +26,8 @@ SPECS = {
                    dyn=("at", "objat", "inrecep", "opened", "closed", "holds", "holding", "handsfree"), out=("taken", "refused")),
     "place":  dict(types=("location", "receptacle", "object"), static=("recat", "openable", "notopenable"),
                    dyn=("at", "objat", "inrecep", "opened", "closed", "holds", "holding", "handsfree"), out=("placed", "refused")),
-    "task":   dict(types=("object", "receptacle", "thing"), static=("target", "dest", "notdest"), dyn=("inrecep",),
-                   out=("goto", "open", "take", "put", "done", "stuck", "wrong_dest")),
+    "task":   dict(types=("object", "receptacle", "thing"), static=("target", "dest", "notdest", "nottarget"), dyn=("inrecep",),
+                   out=("goto", "open", "take", "put", "done", "stuck", "wrong_dest", "wrong_object")),
 }
 # which specialist handles a sub-goal: the driver's manual switch table (step 3 makes it the director's handles/2)
 HANDLES = {"goto": "nav", "open": "access", "take": "grasp", "put": "place"}
@@ -38,7 +38,7 @@ def args_of(atom):
     return [x.strip() for x in atom[i + 1:-1].split(",")] if i >= 0 else []
 
 
-def static_facts(spec, info):
+def static_facts(spec, info, objects=None):
     """The specialist's static facts from the game's (gen_instance's maps), plus the complements."""
     st = list(info["static"])
     want = SPECS[spec]["static"]
@@ -52,6 +52,8 @@ def static_facts(spec, info):
         dests = {f[len("dest("):-1] for f in facts if f.startswith("dest(")}
         kinds = info["handles"]["kind"]
         facts += ["notdest(%s)" % r for r, k in sorted(kinds.items()) if k == "receptacle" and r not in dests]
+        targets = {f[len("target("):-1] for f in facts if f.startswith("target(")}
+        facts += ["nottarget(%s)" % o for o in sorted(objects or ()) if o not in targets]
     return facts
 
 
@@ -118,7 +120,12 @@ def generate(game_dir, out_dir, spec, k, info, reading, init, replay, domain_rel
     if spec in ("grasp", "place") and goal_objs:
         kinds["object"] = goal_objs
     if spec == "task":
-        kinds["object"] = sorted(a[len("target("):-1] for a in static_facts("task", info) if a.startswith("target("))
+        # the driver's task sees its targets and the object its goal names; a person's task (intents=True)
+        # sees every pickupable, since a typed fetch may name any of them (then nottarget/1 refuses it)
+        targets = sorted(a[len("target("):-1] for a in static_facts("task", info) if a.startswith("target("))
+        pick = sorted(a[len("pickupable("):-1] for a in info["static"] if a.startswith("pickupable("))
+        named = sorted({a[a.index("(") + 1:-1].split(",")[0] for a in init if a.startswith("fetch(")})
+        kinds["object"] = pick if intents else sorted(set(targets) | set(named))
     kinds["thing"] = sorted(kinds.get("object", [])) + sorted(kinds.get("receptacle", []))
     things = sorted({h for kind in sp["types"] for h in kinds.get(kind, [])})
     name = "%s_%d" % (spec, k)
@@ -131,7 +138,7 @@ def generate(game_dir, out_dir, spec, k, info, reading, init, replay, domain_rel
         lines.append("type %s {%s}." % (kind, " ".join(sorted(kinds.get(kind, []))) or "none"))
     lines.append("")
     lines.append("% the static facts this specialist sees")
-    lines += [a + "." for a in static_facts(spec, info)]
+    lines += [a + "." for a in static_facts(spec, info, kinds.get("object") if spec == "task" else None)]
     lines.append("")
     lines.append("% the start: the world as it is now (this specialist's predicates), the goal or the results, the tokens")
     for a in sorted(reading):
