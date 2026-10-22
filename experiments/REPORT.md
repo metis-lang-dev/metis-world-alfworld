@@ -63,8 +63,64 @@ all (a later experiment can give the program only what the text names).
 4. `world(lines)` is unsupported (the game is the world); a scenario is another game.
 5. The rule count regex in `complexity.py` counts `[dyn]` rules: 11 after `arrived`.
 
+## The hierarchy by hand (alf-hierarchy s-ee212820 step 1, 2026-10-22; docs/HIERARCHY.md)
+
+The same family through five lifted specialists (`domains/hier/`: nav, access, grasp, place,
+task) with a MANUAL switch (`experiments/hier.py`): one kernel run per activation, the
+driver's table `{goto: nav, open: access, take: grasp, put: place}` is the switch, the task
+domain emits one sub-goal at a time and gets the result atom back. The same 20 games as the
+baseline (seed 1):
+
+| games | won | refusals | activations / game | commands / game | seconds / game |
+|---|---|---|---|---|---|
+| train (discovery) | 10/10 | 0 | 6.0 | 4.4 | 18 |
+| valid_unseen (held out) | 10/10 | 0 | 6.0 | 4.9 | 20 |
+
+Every game: six activations (nav, access, grasp, nav, access, place), 4–5 commands (the
+flat program's 4–5: `access` sends no command when the receptacle has nothing to open), no
+refusal, the same win. The train record was taken with the task's earlier seed
+(`unchosen`); the held-out record with `fetch(O, R)`, the one way in since 9b3f600 — the
+commands are the same either way (the seed names the first target and destination the
+`choose` rule picked).
+
+**The complexity vector per domain** (`experiments/hier_vector.py`, one game, the
+activation instances along the task's plan; the ground bound = Σ over the declared
+predicates of the product of their argument types' sizes):
+
+| domain | rules | preds | types (sizes) | static facts | #init | ground atoms (bound) |
+|---|---|---|---|---|---|---|
+| flat | 10 | 43 | location 18, receptacle 12, object 24, otype 15, rtype 8 | 122 | 47 | 1903 |
+| nav | 2 | 4 | location 18, receptacle 12 | 12 | 2 | 42 |
+| access | 4 | 10 | location 18, receptacle 12 | 24 | 6 | 90 |
+| grasp | 5 | 14 | location 18, receptacle 12, object 1 | 24 | 9 | 78 |
+| place | 5 | 14 | location 18, receptacle 12, object 1 | 24 | 9 | 111 |
+| task | 11 | 21 | object 2, receptacle 12, thing 14 | 14 | 3 | 206 |
+| specialists, sum | 27 | 63 | | 98 | 29 | 527 |
+| specialists, max | 11 | 21 | | 24 | 9 | 206 |
+
+What the split buys: no activation grounds more than 206 atoms against the flat program's
+1 903 (9×), and the specialists summed stay at 527 (3.6×) — because each activation's
+instance is NARROWED to the things its goal names (grasp and place see one object, the
+task its targets; `gen_hier.py`, the host's `things` filter), which the flat program cannot
+do (it chooses among all objects itself). nav is 2 rules over 42 atoms; access 4 over 90.
+The task domain is the largest (11 rules, 206 atoms) because `thing` (objects ∪
+receptacles) types the refusals — the price of `stuck(X)` being one predicate.
+
+Findings for steps 2–3: (1) a result atom per outcome and a refusal per dead end made the
+driver trivial — the switch is the host reading `out`; the director (step 3) replaces the
+table with `handles/2` over the same atoms; (2) the task domain never needs to know
+whether a receptacle opens — asking `access` always is simpler and costs no command;
+(3) `thing`-typed refusals force a second end (`wrong_dest`) because a variable is typed
+once per rule — a lifted base wanting one `stuck` over mixed kinds needs a union type the
+instance declares, which gen_hier does; (4) the replay of the commands so far
+(`game.json: replay`) makes every activation a fresh process over the same game state —
+60 s per game at worst, fine for the text game, not for a simulator with a slow reset
+(MiniHack's host should keep the process and switch packages in it).
+
 ## Next
-Step 2 (opus, nina): the closure on this world — the domain agent over a package, the
-surprise record into the agentic loop with the record as the seed, the experimental gate
-policy (accept iff the held-out split improves), the reload, the metrics; the ablations as
-generator flags. Step 3 (the architect): the measured runs.
+world-alfworld step 2 is REPLACED by loop-policy (s-dd842f2a, metis-agentic-loop
+docs/POLICY.md): the loop builds this family from an EMPTY domain in phases (exploration /
+exploitation / refactoring) with disengagement, and is compared to the flat program above
+and the hierarchy by hand. alf-hierarchy step 2 (opus): an intent card per specialist on
+E2B and the agent over a specialist package; step 3: the director instance activating the
+specialists from the task's sub-goals and from the world's facts.
