@@ -1,0 +1,61 @@
+# grasp's intents (alf-hierarchy step 2, opus): what the person says to have something picked up
+# — one verb, TAKE(object), whose atom is the specialist's goal take(O); the domain answers
+# taken(O) or refused(O) (elsewhere, shut in, hands full). A TEMPLATE: world/gen_hier.py fills
+# `slots.object.enum` and `values.object` with the activation's objects that can be picked up
+# (pickupable/1) and keeps the examples whose values the game has. The program:
+# ../grasp_domain.llp.
+persona: |
+  You are the hands of a household robot that pick things up: a tomato, an apple, a mug, a
+  knife, a book, a towel. The person tells you what to take. Map what they say to exactly one
+  intent JSON per utterance. Respond with only the JSON.
+
+verbs:
+  - {verb: TAKE, meaning: "pick up an object (a tomato, mug, knife, book…) from where it is"}
+  - {verb: UNKNOWN, meaning: "anything else: going somewhere, opening, putting down, carrying somewhere, a question, small talk"}
+
+slots:
+  object: {enum: []}
+
+guidance: |
+  An object is its kind and its number written together, lower case, no space: "mug 2" is mug2,
+  "the second apple" is apple2. A kind named without a number, or one the room has only one
+  of, is number 1: "the tomato" is tomato1, "the pepper shaker" is peppershaker1, "the
+  butter knife" is butterknife1, "the soap" is soapbottle1. Use only the objects listed in the
+  schema. Picking up, grabbing, taking, getting hold of is TAKE; taking something TO a place
+  ("take the mug to the sink") is UNKNOWN here, and so is putting it down.
+
+examples:
+  - ["take the tomato", {"intent":"TAKE","object":"tomato1"}]
+  - ["pick up mug 2", {"intent":"TAKE","object":"mug2"}]
+  - ["grab the second apple", {"intent":"TAKE","object":"apple2"}]
+  - ["get hold of the knife", {"intent":"TAKE","object":"knife1"}]
+  - ["pick the egg up", {"intent":"TAKE","object":"egg1"}]
+  - ["take the pepper shaker", {"intent":"TAKE","object":"peppershaker1"}]
+  - ["grab the soap", {"intent":"TAKE","object":"soapbottle1"}]
+  - ["pick up the book", {"intent":"TAKE","object":"book1"}]
+  - ["take the towel", {"intent":"TAKE","object":"towel1"}]
+  - ["put the tomato down", {"intent":"UNKNOWN"}]
+  - ["take the mug to the sink", {"intent":"UNKNOWN"}]
+  - ["open the fridge", {"intent":"UNKNOWN"}]
+  - ["how are you", {"intent":"UNKNOWN"}]
+
+spoken:
+  heading: Spoken response (after the JSON)
+  text: |
+    After the JSON comes "Spoken response:" and one short sentence the robot says, in the first
+    person. Never JSON, never an intent name.
+  examples:
+    - ["take the tomato", {"intent":"TAKE","object":"tomato1"}, "Taking the tomato."]
+    - ["pick up mug 2", {"intent":"TAKE","object":"mug2"}, "Picking up mug 2."]
+    - ["pick up the book", {"intent":"TAKE","object":"book1"}, "Picking up the book."]
+
+map:
+  - {verb: TAKE, atom: "take({object:object})", act: take}
+values:
+  object: {}
+
+asks: []
+outcomes: {taken: done, refused: refused}
+alternatives:
+  max: 0
+  rules: {}
