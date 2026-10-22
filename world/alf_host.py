@@ -31,6 +31,8 @@ COMMANDS = {
     "take_plain": ("take", "O", "R"),
     "put_open": ("put", "O", "R"),
     "put_plain": ("put", "O", "R"),
+    "go": ("go", "L2", "R"),           # nav_domain (alf-hierarchy): go to R at L2
+    "open_closed": ("open", "R"),      # access_domain
 }
 
 
@@ -49,6 +51,11 @@ def interpreter():
         if os.path.exists(c):
             return c
     return sys.executable
+
+
+def _args(atom):
+    i = atom.find("(")
+    return [x.strip() for x in atom[i + 1:-1].split(",")] if i >= 0 else []
 
 
 def bindings(name):
@@ -120,6 +127,13 @@ class AlfHost:
                 r, l = a[6:-1].split(",")
                 self.recat.setdefault(l, []).append(r)
         self.openable = {a[9:-1] for a in self.static if a.startswith("openable(")}
+        # a hierarchy package (world/gen_hier.py): the commands to replay before the program starts,
+        # the predicates the package declares (the reading is filtered to them), and its result
+        # predicates (an atom of one in the counts ends the episode: the result is out)
+        self.replay = list(meta.get("replay") or [])
+        self.observed = set(meta["observe"]) if meta.get("observe") else None
+        self.out = set(meta.get("out") or [])
+        self.things = set(meta["things"]) if meta.get("things") else None   # … and the things it declares
         self.beat, self.due, self.script, self.last = 0, (), {}, None   # the AgentHost reads these
         self._reset()
 
@@ -130,6 +144,9 @@ class AlfHost:
         self.commands = []                           # (beat, rule, command, admissible, changed): the snapshot
         self.t, self.done, self.won = 0, False, False
         self.stepped = False
+        for c in self.replay:                        # the prefix another package's run sent
+            self._take(self.gym.call("step", command=c))
+            self.t += 1
 
     def _take(self, out):
         self.dyn = set(out["dynamic"])
@@ -147,6 +164,10 @@ class AlfHost:
         for rec in self.openable:
             if rec not in opened:
                 r["closed(%s)" % rec] = 1
+        if self.observed is not None:
+            r = {a: n for a, n in r.items() if a.split("(")[0] in self.observed}
+        if self.things is not None:
+            r = {a: n for a, n in r.items() if all(x in self.things for x in _args(a))}
         return r
 
     # ── the commands ──
@@ -210,12 +231,20 @@ class AlfHost:
         return self.reading()
 
     def tick(self, counts):
-        if self.done:
+        if self.done and not self.out:
             return None
         self.beat += 1
         self.stepped = False
+        reading = self.reading()
+        own = sorted(a for a, n in counts.items() if n > 0 and a not in reading and a.split("(")[0] not in DYNAMIC_PREDS)
+        out = [a for a in own if a.split("(")[0] in self.out]
+        tokens = [a for a in own if a not in out]
         dos = self.sync(counts)
-        self._log({"beat": self.beat, "tick": True, "counts": len(counts), "sync": dos[:12], "n_sync": len(dos)})
+        self._log({"beat": self.beat, "tick": True, "counts": len(counts), "sync": dos[:12], "n_sync": len(dos),
+                   "tokens": tokens, "out": out})
+        if out or self.done:                         # a result is out (or the game ended): the run is over
+            self.done = True
+            return None
         return dos
 
     def sync(self, counts):

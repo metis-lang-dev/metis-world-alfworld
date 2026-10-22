@@ -121,3 +121,45 @@ def test_program_reaches_placed_alone(package):
     _, path = package
     out = subprocess.run([os.environ["METISC"], "--run", path], capture_output=True, text=True, timeout=600)
     assert "Q placed 1/1" in out.stdout, out.stdout[-500:] + out.stderr[-300:]
+
+
+# ── the hierarchy (alf-hierarchy step 1): the specialists over the same game, a manual switch ──
+import gen_hier  # noqa: E402
+
+
+def test_hierarchy_wins_by_manual_switch(tmp_path):
+    """The task domain emits sub-goals, the driver activates the specialist that handles each,
+    the game is won; every activation ends in a result atom; no command refused."""
+    if not os.path.exists(os.path.join(os.path.dirname(ROOT), ".venv", "bin", "metis")):
+        pytest.skip("no metispy `metis` beside the world repos")
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import hier
+    wd = str(tmp_path)
+    import shutil
+    shutil.copy(os.path.join(ROOT, "domains", "alfred_domain.llp"), os.path.join(wd, "alfred_domain.llp"))
+    os.makedirs(os.path.join(wd, "hier"))
+    for s in gen_hier.SPECS:
+        shutil.copy(os.path.join(ROOT, "domains", "hier", s + "_domain.llp"), os.path.join(wd, "hier", s + "_domain.llp"))
+    r = hier.run_game(game_dir(), wd)
+    assert r["error"] is None, r
+    assert r["won"] and r["outcome"] == "done", r
+    assert [a["spec"] for a in r["activations"]] == ["nav", "access", "grasp", "nav", "access", "place"]
+    assert all(a["result"] for a in r["activations"]) and r["refused"] == 0
+
+
+def test_hierarchy_instances_see_less(tmp_path):
+    """Each specialist's instance declares fewer predicates and starts from fewer facts than the flat one."""
+    path, nd, ns = gen_instance.generate(game_dir(), str(tmp_path))
+    info = json.load(open(os.path.join(os.path.dirname(path), "game.json")))
+    h = AlfHost(os.path.dirname(path))
+    try:
+        info = dict(info, static=sorted(h.static), task_type=h.task, params=h.params)
+        reading = h.reading()
+    finally:
+        h.gym.close()
+    flat_init = sum(1 for l in open(path) if l.startswith("#init"))
+    for spec in gen_hier.SPECS:
+        p = gen_hier.generate(game_dir(), str(tmp_path / "pk"), spec, 0, info, reading, ["unchosen"], [])
+        init = sum(1 for l in open(p) if l.startswith("#init"))
+        assert init < flat_init, (spec, init, flat_init)
+        assert gen_hier.vector(spec)["rules"] <= 10
