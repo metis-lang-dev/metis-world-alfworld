@@ -78,10 +78,9 @@ baseline (seed 1):
 
 Every game: six activations (nav, access, grasp, nav, access, place), 4–5 commands (the
 flat program's 4–5: `access` sends no command when the receptacle has nothing to open), no
-refusal, the same win. The train record was taken with the task's earlier seed
-(`unchosen`); the held-out record with `fetch(O, R)`, the one way in since 9b3f600 — the
-commands are the same either way (the seed names the first target and destination the
-`choose` rule picked).
+refusal, the same win. Both records were taken with `fetch(O, R)` as the task's one way in
+(9b3f600): the driver seeds the first target and the first destination, the same atom the
+FETCH intent types.
 
 **The complexity vector per domain** (`experiments/hier_vector.py`, one game, the
 activation instances along the task's plan; the ground bound = Σ over the declared
