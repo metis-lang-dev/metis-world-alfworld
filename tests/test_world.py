@@ -163,3 +163,40 @@ def test_hierarchy_instances_see_less(tmp_path):
         init = sum(1 for l in open(p) if l.startswith("#init"))
         assert init < flat_init, (spec, init, flat_init)
         assert gen_hier.vector(spec)["rules"] <= 12
+
+
+def test_activation_cards(tmp_path):
+    """alf-hierarchy step 2: with intents=True an activation's package carries its card — the
+    template's slots filled with the activation's things in capitals (the mapper's keys) mapping to
+    the handles, only the examples the game has, the things in the guidance, the manifest naming
+    it; without it the driver's package stays four files."""
+    import yaml
+    path, _, _ = gen_instance.generate(game_dir(), str(tmp_path))
+    info = json.load(open(os.path.join(os.path.dirname(path), "game.json")))
+    h = AlfHost(os.path.dirname(path))
+    try:
+        info = dict(info, static=sorted(h.static), task_type=h.task, params=h.params)
+        reading = h.reading()
+    finally:
+        h.gym.close()
+    kinds = info["handles"]["kind"]
+    pick = {a[len("pickupable("):-1] for a in info["static"] if a.startswith("pickupable(")}
+    targets = {a[len("target("):-1] for a in gen_hier.static_facts("task", info) if a.startswith("target(")}
+    plain = os.path.dirname(gen_hier.generate(game_dir(), str(tmp_path / "plain"), "nav", 0, info, reading, [], []))
+    assert sorted(os.listdir(plain)) == ["alf_host.py", "domain.yaml", "game.json", "nav.llp"]
+    for spec in gen_hier.SPECS:
+        pkg = os.path.dirname(gen_hier.generate(game_dir(), str(tmp_path / "pk"), spec, 0, info, reading, [], [],
+                                                intents=True))
+        assert "intent: {spec: intent.yaml}" in open(os.path.join(pkg, "domain.yaml")).read()
+        c = yaml.safe_load(open(os.path.join(pkg, "intent.yaml")))
+        want = {"receptacle": {r for r, k in kinds.items() if k == "receptacle"},
+                "object": targets if spec == "task" else {o for o, k in kinds.items() if k == "object" and o in pick}}
+        for slot, s in c["slots"].items():
+            assert {v.lower() for v in s["enum"]} == want[slot], (spec, slot)
+            assert c["values"][slot] == {v.upper(): v for v in want[slot]}
+            assert all(v.upper() in c["guidance"] for v in want[slot])
+        for _, j in c["examples"]:
+            assert all(j[k].lower() in want[k] for k in j if k in want), (spec, j)
+        assert [r["atom"].split("(")[0] for r in c["map"]] == [{"nav": "goto", "access": "open", "grasp": "take",
+                                                                 "place": "put", "task": "fetch"}[spec]]
+        assert all(" " not in r["atom"] for r in c["map"])     # a do-line reads a space as its count's
