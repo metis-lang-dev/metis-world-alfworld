@@ -17,22 +17,22 @@ slots:
   receptacle: {enum: []}
 
 guidance: |
-  A receptacle is its kind and its number written together, lower case, no space: "drawer 3"
-  is drawer3, "the second cabinet" is cabinet2. A kind named without a number, or one the room
-  has only one of, is number 1: "the fridge" is fridge1, "the microwave" is microwave1. Use
+  A receptacle is its kind and its number written together in capitals, no space: "drawer 3"
+  is DRAWER3, "the second cabinet" is CABINET2. A kind named without a number, or one the room
+  has only one of, is number 1: "the fridge" is FRIDGE1, "the microwave" is MICROWAVE1. Use
   only the receptacles listed in the schema. Opening, getting into, unlatching, looking inside
-  something are OPEN ("let me see inside the fridge" is OPEN fridge1); closing, going, taking or
+  something are OPEN ("let me see inside the fridge" is OPEN FRIDGE1); closing, going, taking or
   putting is UNKNOWN here.
 
 examples:
-  - ["open the fridge", {"intent":"OPEN","receptacle":"fridge1"}]
-  - ["open drawer 3", {"intent":"OPEN","receptacle":"drawer3"}]
-  - ["pull the second drawer open", {"intent":"OPEN","receptacle":"drawer2"}]
-  - ["open up the microwave", {"intent":"OPEN","receptacle":"microwave1"}]
-  - ["get cabinet 4 open", {"intent":"OPEN","receptacle":"cabinet4"}]
-  - ["let me see inside the fridge", {"intent":"OPEN","receptacle":"fridge1"}]
-  - ["open the safe", {"intent":"OPEN","receptacle":"safe1"}]
-  - ["open the box", {"intent":"OPEN","receptacle":"box1"}]
+  - ["open the fridge", {"intent":"OPEN","receptacle":"FRIDGE1"}]
+  - ["open drawer 3", {"intent":"OPEN","receptacle":"DRAWER3"}]
+  - ["pull the second drawer open", {"intent":"OPEN","receptacle":"DRAWER2"}]
+  - ["open up the microwave", {"intent":"OPEN","receptacle":"MICROWAVE1"}]
+  - ["get cabinet 4 open", {"intent":"OPEN","receptacle":"CABINET4"}]
+  - ["let me see inside the fridge", {"intent":"OPEN","receptacle":"FRIDGE1"}]
+  - ["open the safe", {"intent":"OPEN","receptacle":"SAFE1"}]
+  - ["open the box", {"intent":"OPEN","receptacle":"BOX1"}]
   - ["close the fridge", {"intent":"UNKNOWN"}]
   - ["go to the drawer", {"intent":"UNKNOWN"}]
   - ["take the egg", {"intent":"UNKNOWN"}]
@@ -44,9 +44,9 @@ spoken:
     After the JSON comes "Spoken response:" and one short sentence the robot says, in the first
     person. Never JSON, never an intent name.
   examples:
-    - ["open the fridge", {"intent":"OPEN","receptacle":"fridge1"}, "Opening the fridge."]
-    - ["open drawer 3", {"intent":"OPEN","receptacle":"drawer3"}, "Opening drawer 3."]
-    - ["open the safe", {"intent":"OPEN","receptacle":"safe1"}, "Opening the safe."]
+    - ["open the fridge", {"intent":"OPEN","receptacle":"FRIDGE1"}, "Opening the fridge."]
+    - ["open drawer 3", {"intent":"OPEN","receptacle":"DRAWER3"}, "Opening drawer 3."]
+    - ["open the safe", {"intent":"OPEN","receptacle":"SAFE1"}, "Opening the safe."]
 
 map:
   - {verb: OPEN, atom: "open({receptacle:receptacle})", act: open}

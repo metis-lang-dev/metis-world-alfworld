@@ -17,23 +17,25 @@ slots:
   object: {enum: []}
 
 guidance: |
-  An object is its kind and its number written together, lower case, no space: "mug 2" is mug2,
-  "the second apple" is apple2. A kind named without a number, or one the room has only one
-  of, is number 1: "the tomato" is tomato1, "the pepper shaker" is peppershaker1, "the
-  butter knife" is butterknife1, "the soap" is soapbottle1. Use only the objects listed in the
+  An object is its kind and its number written together in capitals, no space: "mug 2" is MUG2,
+  "the second apple" is APPLE2. A kind named without a number, or one the room has only one
+  of, is number 1: "the tomato" is TOMATO1, "the pepper shaker" is PEPPERSHAKER1, "the
+  butter knife" is BUTTERKNIFE1, "the soap" is SOAPBOTTLE1, "the paper towels" is
+  PAPERTOWELROLL1. A name is the kind the person says, never a look-alike (a cup is not a mug, a
+  salt shaker not a pepper shaker, a potato not a tomato). Use only the objects listed in the
   schema. Picking up, grabbing, taking, getting hold of is TAKE; taking something TO a place
   ("take the mug to the sink") is UNKNOWN here, and so is putting it down.
 
 examples:
-  - ["take the tomato", {"intent":"TAKE","object":"tomato1"}]
-  - ["pick up mug 2", {"intent":"TAKE","object":"mug2"}]
-  - ["grab the second apple", {"intent":"TAKE","object":"apple2"}]
-  - ["get hold of the knife", {"intent":"TAKE","object":"knife1"}]
-  - ["pick the egg up", {"intent":"TAKE","object":"egg1"}]
-  - ["take the pepper shaker", {"intent":"TAKE","object":"peppershaker1"}]
-  - ["grab the soap", {"intent":"TAKE","object":"soapbottle1"}]
-  - ["pick up the book", {"intent":"TAKE","object":"book1"}]
-  - ["take the towel", {"intent":"TAKE","object":"towel1"}]
+  - ["take the tomato", {"intent":"TAKE","object":"TOMATO1"}]
+  - ["pick up mug 2", {"intent":"TAKE","object":"MUG2"}]
+  - ["grab the second apple", {"intent":"TAKE","object":"APPLE2"}]
+  - ["get hold of the knife", {"intent":"TAKE","object":"KNIFE1"}]
+  - ["pick the egg up", {"intent":"TAKE","object":"EGG1"}]
+  - ["take the pepper shaker", {"intent":"TAKE","object":"PEPPERSHAKER1"}]
+  - ["grab the soap", {"intent":"TAKE","object":"SOAPBOTTLE1"}]
+  - ["pick up the book", {"intent":"TAKE","object":"BOOK1"}]
+  - ["take the towel", {"intent":"TAKE","object":"TOWEL1"}]
   - ["put the tomato down", {"intent":"UNKNOWN"}]
   - ["take the mug to the sink", {"intent":"UNKNOWN"}]
   - ["open the fridge", {"intent":"UNKNOWN"}]
@@ -45,9 +47,9 @@ spoken:
     After the JSON comes "Spoken response:" and one short sentence the robot says, in the first
     person. Never JSON, never an intent name.
   examples:
-    - ["take the tomato", {"intent":"TAKE","object":"tomato1"}, "Taking the tomato."]
-    - ["pick up mug 2", {"intent":"TAKE","object":"mug2"}, "Picking up mug 2."]
-    - ["pick up the book", {"intent":"TAKE","object":"book1"}, "Picking up the book."]
+    - ["take the tomato", {"intent":"TAKE","object":"TOMATO1"}, "Taking the tomato."]
+    - ["pick up mug 2", {"intent":"TAKE","object":"MUG2"}, "Picking up mug 2."]
+    - ["pick up the book", {"intent":"TAKE","object":"BOOK1"}, "Picking up the book."]
 
 map:
   - {verb: TAKE, atom: "take({object:object})", act: take}

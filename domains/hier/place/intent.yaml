@@ -18,21 +18,23 @@ slots:
   receptacle: {enum: []}
 
 guidance: |
-  Things are their kind and their number written together, lower case, no space: "mug 2" is
-  mug2, "drawer 3" is drawer3, "counter 2" is countertop2. A kind named without a number, or
-  one the room has only one of, is number 1: "the tomato" is tomato1, "the fridge" is fridge1,
-  "the counter" is countertop1, "the table" is diningtable1. Use only the things listed in
-  the schema. Putting, placing, dropping,
+  Things are their kind and their number written together in capitals, no space: "mug 2" is
+  MUG2, "drawer 3" is DRAWER3, "counter 2" is COUNTERTOP2. A kind named without a number, or
+  one the room has only one of, is number 1: "the tomato" is TOMATO1, "the fridge" is FRIDGE1,
+  "the counter" is COUNTERTOP1, "the table" is DININGTABLE1, "the stove" is STOVEBURNER1 and
+  "burner 2" STOVEBURNER2, "the coffee maker" is COFFEEMACHINE1, "the trash" is GARBAGECAN1.
+  A name is the kind the person says, never a look-alike (a cup is not a mug, a salt shaker
+  not a pepper shaker). Use only the things listed in the schema. Putting, placing, dropping,
   setting something in or on a receptacle is PUT; picking up or going is UNKNOWN here.
 
 examples:
-  - ["put the tomato in the fridge", {"intent":"PUT","object":"tomato1","receptacle":"fridge1"}]
-  - ["place mug 2 on the counter", {"intent":"PUT","object":"mug2","receptacle":"countertop1"}]
-  - ["drop the apple in drawer 3", {"intent":"PUT","object":"apple1","receptacle":"drawer3"}]
-  - ["set the knife on the table", {"intent":"PUT","object":"knife1","receptacle":"diningtable1"}]
-  - ["put the egg in the microwave", {"intent":"PUT","object":"egg1","receptacle":"microwave1"}]
-  - ["put the soap on the toilet", {"intent":"PUT","object":"soapbottle1","receptacle":"toilet1"}]
-  - ["put the book on the desk", {"intent":"PUT","object":"book1","receptacle":"desk1"}]
+  - ["put the tomato in the fridge", {"intent":"PUT","object":"TOMATO1","receptacle":"FRIDGE1"}]
+  - ["place mug 2 on the counter", {"intent":"PUT","object":"MUG2","receptacle":"COUNTERTOP1"}]
+  - ["drop the apple in drawer 3", {"intent":"PUT","object":"APPLE1","receptacle":"DRAWER3"}]
+  - ["set the knife on the table", {"intent":"PUT","object":"KNIFE1","receptacle":"DININGTABLE1"}]
+  - ["put the egg in the microwave", {"intent":"PUT","object":"EGG1","receptacle":"MICROWAVE1"}]
+  - ["put the soap on the toilet", {"intent":"PUT","object":"SOAPBOTTLE1","receptacle":"TOILET1"}]
+  - ["put the book on the desk", {"intent":"PUT","object":"BOOK1","receptacle":"DESK1"}]
   - ["pick up the tomato", {"intent":"UNKNOWN"}]
   - ["go to the fridge", {"intent":"UNKNOWN"}]
   - ["tell me a joke", {"intent":"UNKNOWN"}]
@@ -43,9 +45,9 @@ spoken:
     After the JSON comes "Spoken response:" and one short sentence the robot says, in the first
     person. Never JSON, never an intent name.
   examples:
-    - ["put the tomato in the fridge", {"intent":"PUT","object":"tomato1","receptacle":"fridge1"}, "Putting the tomato in the fridge."]
-    - ["place mug 2 on the counter", {"intent":"PUT","object":"mug2","receptacle":"countertop1"}, "Placing mug 2 on the counter."]
-    - ["put the book on the desk", {"intent":"PUT","object":"book1","receptacle":"desk1"}, "Putting the book on the desk."]
+    - ["put the tomato in the fridge", {"intent":"PUT","object":"TOMATO1","receptacle":"FRIDGE1"}, "Putting the tomato in the fridge."]
+    - ["place mug 2 on the counter", {"intent":"PUT","object":"MUG2","receptacle":"COUNTERTOP1"}, "Placing mug 2 on the counter."]
+    - ["put the book on the desk", {"intent":"PUT","object":"BOOK1","receptacle":"DESK1"}, "Putting the book on the desk."]
 
 map:
   - {verb: PUT, atom: "put({object:object}, {receptacle:receptacle})", act: put}

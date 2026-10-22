@@ -19,23 +19,23 @@ slots:
   receptacle: {enum: []}
 
 guidance: |
-  Things are their kind and their number written together, lower case, no space: "tomato 2"
-  is tomato2, "drawer 3" is drawer3. A kind named without a number, or one the room has only
-  one of, is number 1: "the tomato" is tomato1, "the fridge" is fridge1, "the counter" is
-  countertop1, "the table" is diningtable1. Bringing, fetching, moving, putting away, getting
+  Things are their kind and their number written together in capitals, no space: "tomato 2"
+  is TOMATO2, "drawer 3" is DRAWER3. A kind named without a number, or one the room has only
+  one of, is number 1: "the tomato" is TOMATO1, "the fridge" is FRIDGE1, "the counter" is
+  COUNTERTOP1, "the table" is DININGTABLE1. Bringing, fetching, moving, putting away, getting
   an object TO a receptacle is FETCH, and so is "put X in R" when the person wants the whole
   errand done. An object that is not in the schema's object list is UNKNOWN (never another
   object in its place). Just going somewhere, just opening or just picking up is UNKNOWN here.
 
 examples:
-  - ["fetch the tomato to the fridge", {"intent":"FETCH","object":"tomato1","receptacle":"fridge1"}]
-  - ["bring the tomato to the microwave", {"intent":"FETCH","object":"tomato1","receptacle":"microwave1"}]
-  - ["put a tomato in the microwave", {"intent":"FETCH","object":"tomato1","receptacle":"microwave1"}]
-  - ["move the second tomato to the table", {"intent":"FETCH","object":"tomato2","receptacle":"diningtable1"}]
-  - ["get the mug onto the counter", {"intent":"FETCH","object":"mug1","receptacle":"countertop1"}]
-  - ["put the apple away in the fridge", {"intent":"FETCH","object":"apple1","receptacle":"fridge1"}]
-  - ["bring the soap to the toilet", {"intent":"FETCH","object":"soapbottle1","receptacle":"toilet1"}]
-  - ["take the book to the desk", {"intent":"FETCH","object":"book1","receptacle":"desk1"}]
+  - ["fetch the tomato to the fridge", {"intent":"FETCH","object":"TOMATO1","receptacle":"FRIDGE1"}]
+  - ["bring the tomato to the microwave", {"intent":"FETCH","object":"TOMATO1","receptacle":"MICROWAVE1"}]
+  - ["put a tomato in the microwave", {"intent":"FETCH","object":"TOMATO1","receptacle":"MICROWAVE1"}]
+  - ["move the second tomato to the table", {"intent":"FETCH","object":"TOMATO2","receptacle":"DININGTABLE1"}]
+  - ["get the mug onto the counter", {"intent":"FETCH","object":"MUG1","receptacle":"COUNTERTOP1"}]
+  - ["put the apple away in the fridge", {"intent":"FETCH","object":"APPLE1","receptacle":"FRIDGE1"}]
+  - ["bring the soap to the toilet", {"intent":"FETCH","object":"SOAPBOTTLE1","receptacle":"TOILET1"}]
+  - ["take the book to the desk", {"intent":"FETCH","object":"BOOK1","receptacle":"DESK1"}]
   - ["go to the fridge", {"intent":"UNKNOWN"}]
   - ["pick up the tomato", {"intent":"UNKNOWN"}]
   - ["open the microwave", {"intent":"UNKNOWN"}]
@@ -47,9 +47,9 @@ spoken:
     After the JSON comes "Spoken response:" and one short sentence the robot says, in the first
     person. Never JSON, never an intent name.
   examples:
-    - ["fetch the tomato to the fridge", {"intent":"FETCH","object":"tomato1","receptacle":"fridge1"}, "I'll get the tomato into the fridge."]
-    - ["bring the tomato to the microwave", {"intent":"FETCH","object":"tomato1","receptacle":"microwave1"}, "Bringing the tomato to the microwave."]
-    - ["take the book to the desk", {"intent":"FETCH","object":"book1","receptacle":"desk1"}, "Taking the book to the desk."]
+    - ["fetch the tomato to the fridge", {"intent":"FETCH","object":"TOMATO1","receptacle":"FRIDGE1"}, "I'll get the tomato into the fridge."]
+    - ["bring the tomato to the microwave", {"intent":"FETCH","object":"TOMATO1","receptacle":"MICROWAVE1"}, "Bringing the tomato to the microwave."]
+    - ["take the book to the desk", {"intent":"FETCH","object":"BOOK1","receptacle":"DESK1"}, "Taking the book to the desk."]
 
 map:
   - {verb: FETCH, atom: "fetch({object:object}, {receptacle:receptacle})", act: fetch}

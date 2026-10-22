@@ -67,14 +67,23 @@ def card(spec, kinds, info):
     text = open(t).read()
     c = yaml.safe_load(text)
     pick = {a[len("pickupable("):-1] for a in info["static"] if a.startswith("pickupable(")}
-    have = {"receptacle": sorted(kinds.get("receptacle", [])),
-            "object": sorted(o for o in kinds.get("object", []) if spec == "task" or o in pick)}
-    for slot in c.get("slots") or {}:
-        c["slots"][slot] = {"enum": have[slot]}
-        c["values"][slot] = {v: v for v in have[slot]}
+    import re
+    num = lambda h: (re.sub(r"\d+$", "", h), int(re.search(r"\d*$", h).group() or 0))   # cabinet2 before cabinet10
+    have = {"receptacle": sorted(kinds.get("receptacle", []), key=num),
+            "object": sorted((o for o in kinds.get("object", []) if spec == "task" or o in pick), key=num)}
+    for slot in c.get("slots") or {}:      # an enum value upper-cased, as the mapper looks it up; the atom's constant
+        c["slots"][slot] = {"enum": [v.upper() for v in have[slot]]}
+        c["values"][slot] = {v.upper(): v for v in have[slot]}
+
+    # the room's things in the prompt too: the grammar holds the model to them, and a model that
+    # has not read a name (bread, a spatula) answers UNKNOWN rather than an enum value it never saw
+    said = {"receptacle": "The receptacles here", "object": "The objects this task moves" if spec == "task"
+            else "The objects here that can be picked up"}
+    c["guidance"] = c["guidance"].rstrip("\n") + "\n" + "".join(
+        "%s: %s.\n" % (said[slot], ", ".join(v.upper() for v in have[slot])) for slot in c.get("slots") or {})
 
     def known(j):
-        return all(j[k] in have[k] for k in j if k in have)
+        return all(j[k].lower() in have[k] for k in j if k in have)
 
     c["examples"] = [e for e in c["examples"] if known(e[1])]
     if c.get("spoken"):
